@@ -67,13 +67,21 @@ static const float	gBounceThreshold			= -2.0f;
 static const float	gFrictionOffsetThreshold	= 0.04f;
 static const float	gCorrelationDistance		= 0.025f;
 static const float	gBoundsInflation			= 0.02f;
-static const float	gStaticFriction				= 0.5f;
-static const float	gDynamicFriction			= 0.5f;
+static const float  gStaticFriction             = 0.5f;
+static const float  gDynamicFriction            = 0.5f;
+
+//static const float    gStaticFriction                = 0.0f;
+//static const float    gDynamicFriction            = 0.0f;
+
 static const float	gRestitution				= 0.0f;
 static const float	gMaxDepenetrationVelocity	= 10.0f;
 static const float	gMaxContactImpulse			= FLT_MAX;
-static const float	gLinearDamping				= 0.1f;
-static const float	gAngularDamping				= 0.05f;
+static const float    gLinearDamping                = 0.1f;
+static const float    gAngularDamping                = 0.05f;
+
+//static const float    gLinearDamping                = 0.0f;
+//static const float    gAngularDamping                = 0.0f;
+
 static const float	gMaxLinearVelocity			= 100.0f;
 static const float	gMaxAngularVelocity			= 100.0f;
 static const float	gJointFrictionCoefficient	= 0.05f;
@@ -563,8 +571,8 @@ void ImmediateScene::createScene()
 		// Box stack
 		{
 			const PxVec3 extents(0.5f, 0.5f, 0.5f);
-			const PxBoxGeometry boxGeom(extents);
-			//const PxSphereGeometry boxGeom(0.5);// extents);
+//            const PxBoxGeometry boxGeom(extents);
+            const PxSphereGeometry boxGeom(0.5);// extents);
 
 			MassProps massProps;
 			computeMassProps(massProps, boxGeom, 1.0f);
@@ -572,16 +580,18 @@ void ImmediateScene::createScene()
 	//		for(PxU32 i=0;i<8;i++)
 	//			createBox(extents, PxTransform(PxVec3(0.0f, extents.y + float(i)*extents.y*2.0f, 0.0f)), 1.0f);
 
-			PxU32 size = 28;
-//			PxU32 size = 2;
+//            PxU32 size = 28;
+            PxU32 size = 2;
 //			PxU32 size = 1;
 			float y = extents.y;
 			float x = 0.0f;
 			while(size)
 			{
-				for(PxU32 i=0;i<1;i++)
-					createActor(boxGeom, PxTransform(PxVec3(x+float(i)*extents.x*2.0f, y, 0.0f)), &massProps);
-
+//                for(PxU32 i=0;i<1;i++)
+//                    createActor(boxGeom, PxTransform(PxVec3(x+float(i)*extents.x*2.0f, y, 0.0f)), &massProps);
+                if(size==1)
+                    computeMassProps(massProps, boxGeom, 1.0f);
+                createActor(boxGeom, PxTransform(0, y, 0.0f), &massProps);
 				//x += extents.x;
 				y += extents.y*2.0f;
 				size--;
@@ -1982,6 +1992,7 @@ static PxDefaultErrorCallback	gErrorCallback;
 static PxFoundation*			gFoundation	= NULL;
 static ImmediateScene*			gScene		= NULL;
 
+static int sim_steps = 0;
 ///////////////////////////////////////////////////////////////////////////////
 
 PxU32 getNbGeoms()
@@ -2079,6 +2090,9 @@ void initPhysics(bool /*interactive*/)
 
 void stepPhysics(bool /*interactive*/)
 {
+    printf("steps %d\n", sim_steps);
+    if(++sim_steps==1000)
+        exit(0);
 	PX_PROFILE_ZONE("stepPhysics", 0);
 	if(!gScene)
 		return;
